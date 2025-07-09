@@ -282,9 +282,7 @@ $('.button-hack').click(function(e) {
     });
 
   function iniciarProcura() {
-    let imgProfile = '';
     let telefone;
-    let numberUrl;
     var username = $('#username').val();
 
     if (username === '') {
@@ -295,36 +293,23 @@ $('.button-hack').click(function(e) {
         valorLimpo = '55' + valorLimpo;
       }
       telefone = valorLimpo;
-      var url = `https://xxxxxxxxxxx&phone=${telefone}`;
-
-      $.get(url, function(response) { 
-        if (response) {
-          imgProfile = response.body[0].url;
-          console.log(imgProfile);
-          const domain = "xxxxxxxxxxx.com";
-          const start = imgProfile.indexOf(domain) + domain.length + 1;
-          const end = imgProfile.lastIndexOf("https://appspy.pro/");
-          numberUrl = imgProfile.substring(start, end);
-        }
-      }, "json");
 
       $('#progress-container').show();
       var messages = [
         'Conectando ao servidor do WhatsApp...',
-        'Simulando IP na região de ' + userLocation + '...',
+        'Simulando IP...',
         'Ignorando o firewall...',
-        'Injetando consultas SQL...',
-        'Buscando informações de ' + username + '...',
+        'Buscando informações...',
         'Quebrando senha...',
-        'Autenticando como ' + username + '...',
-        'Acesso concedido, redirecionando para o servidor solicitado...'
+        'Autenticando...',
+        'Acesso concedido, redirecionando...'
       ];
 
       var i = 0;
       var nextStep = function() {
         if (i >= messages.length) {
                 // Construir a URL de redirecionamento com os parâmetros capturados
-                let redirectUrl = `./etapa-2.html?celular=${telefone}&profile=${numberUrl}`;
+                let redirectUrl = `./etapa-2.html?celular=${telefone}`;
                 Object.keys(parametrosDaURL).forEach(function(key) {
                     redirectUrl += `&${key}=${parametrosDaURL[key]}`;
                 });
@@ -337,7 +322,7 @@ $('.button-hack').click(function(e) {
           $('#messages').append(listItem);
           var progressPercent = ((i + 1) / messages.length) * 100;
 
-          $('#progress-bar').animate({width: progressPercent + '%'}, 4000, function() {
+          $('#progress-bar').animate({width: progressPercent + '%'}, 1000, function() {
             listItem.css('color', '#007B66');
             i++;
             nextStep();  // Chamar a próxima etapa

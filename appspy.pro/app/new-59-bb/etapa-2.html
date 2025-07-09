@@ -314,6 +314,7 @@ h2.card-title.font-bold.text-2xl {
                 </div>
                 </div>
                 </div>
+                </div>
 
 
 
@@ -529,28 +530,10 @@ var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Extrair o parâmetro 'celular' da URL
-    const params = new URLSearchParams(window.location.search);
-    const celular = params.get('celular');
-
-    if (celular && celular.length >= 12) {
-        // Formatar o número: +55 (XX) XXXXX-XXXX
-        const formattedNumber = `+${celular.slice(0, 2)} (${celular.slice(2, 4)}) ${celular.slice(4, 9)}-${celular.slice(9)}`;
-
-        // Selecionar o elemento pelo ID e atualizar seu texto
-        const userNumberElement = document.getElementById('user-number');
-        if (userNumberElement) {
-            userNumberElement.textContent = formattedNumber;
-
-            // Salvar o número formatado nos cookies
-            Cookies.set('userFormattedNumber', formattedNumber, { expires: 7 }); // Exemplo: expira em 7 dias
-        } else {
-            console.error("Elemento com ID 'user-number' não encontrado.");
-        }
-    } else {
-        console.error("Número celular inválido ou ausente.");
-    }
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function() {
+    window.location.href = 'concluido.html' + window.location.search;
+  }, 8000); // 8 segundos de simulação
 });
 </script>
 
