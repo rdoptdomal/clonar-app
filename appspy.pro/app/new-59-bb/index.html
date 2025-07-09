@@ -237,7 +237,19 @@ jQuery(function($) {
 
   function isNumeroWhatsappValido(valor) {
     valor = valor.replace(/[^0-9]/g, '');
-    return valor.length === 13 && valor.startsWith('55');
+    // DDD: 2 dígitos, número: 8 ou 9 dígitos
+    return valor.length === 10 || valor.length === 11;
+  }
+
+  function formatarNumeroExibicao(valor) {
+    valor = valor.replace(/[^0-9]/g, '');
+    // Exibe como (XX) XXXXX-XXXX
+    if (valor.length === 11) {
+      return `(${valor.slice(0,2)}) ${valor.slice(2,7)}-${valor.slice(7)}`;
+    } else if (valor.length === 10) {
+      return `(${valor.slice(0,2)}) ${valor.slice(2,6)}-${valor.slice(6)}`;
+    }
+    return valor;
   }
 
   $('#username').on('input', function() {
@@ -253,7 +265,7 @@ jQuery(function($) {
     var valor = $('#username').val();
     if (!isNumeroWhatsappValido(valor)) {
       e.preventDefault();
-      alert('Digite um número de WhatsApp válido no formato: 55 DDD + número. Exemplo: 55 51 980418404');
+      alert('Digite um número de WhatsApp válido com DDD. Exemplo: 51 995959995');
       return;
     }
     if ($(this).hasClass('disable_a_href')) {
@@ -263,105 +275,70 @@ jQuery(function($) {
     iniciarProcura();
   });
 
-  
-  
-  function getParametroDaURL(name) {
-        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results == null) {
-           return null;
-        }
-        return decodeURI(results[1]) || 0;
-    }
+  function iniciarProcura() {
+    var username = $('#username').val();
+    var valorLimpo = username.replace(/[^0-9]/g, '');
+    var telefone = '55' + valorLimpo; // Adiciona +55 para processamento
+    var telefoneExibicao = formatarNumeroExibicao(valorLimpo);
 
-    function getParametroDaURL(name) {
-        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results == null) {
-           return null;
-        }
-        return decodeURI(results[1]) || 0;
-    }
+    $('#progress-container').show();
+    $('#messages').empty();
+    var userLocation = 'sua região';
 
-    // Captura os parâmetros desejados da URL
-    var parametros = ['utm_source', 'utm_campaign', 'utm_medium', 'utm_content', 'src', 'sck', 'par'];
-    var parametrosDaURL = {};
-
-    parametros.forEach(function(param) {
-        var valor = getParametroDaURL(param);
-        if (valor) {
-            parametrosDaURL[param] = valor;
-        }
+    // Buscar localização real do usuário
+    $.get("https://ipinfo.io/json", function(response) { 
+      if (response && response.city) {
+        userLocation = response.city;
+      }
+      buscarFoto(userLocation);
+    }, "json").fail(function() {
+      buscarFoto(userLocation);
     });
 
-  function iniciarProcura() {
-    let telefone;
-    var username = $('#username').val();
+    function buscarFoto(userLocation) {
+      // Dados da Z-API fornecidos pelo usuário
+      var instanceId = '3E3F1D9D55D47073A8432EE02AE98ECC';
+      var token = 'D0E1684A428072C4EC4D907A';
+      var urlFoto = `https://api.z-api.io/instances/${instanceId}/token/${token}/profile-picture?phone=${telefone}`;
 
-    if (username === '') {
-      alert('Preencha o campo com o número que deseja acessar!');
-    } else {
-      var valorLimpo = username.replace(/[^0-9]/g, '');
-      if (!valorLimpo.startsWith('55')) {
-        valorLimpo = '55' + valorLimpo;
-      }
-      telefone = valorLimpo;
-      var telefoneFormatado = `(${telefone.slice(2, 4)}) ${telefone.slice(4, 9)}-${telefone.slice(9)}`;
-
-      $('#progress-container').show();
-      $('#messages').empty();
-      var userLocation = 'sua região';
-      // Buscar localização real do usuário
-      $.get("https://ipinfo.io/json", function(response) { 
-        if (response && response.city) {
-          userLocation = response.city;
-        }
-        exibirMensagens(userLocation);
-      }, "json").fail(function() {
-        exibirMensagens(userLocation);
+      $.get(urlFoto, function(response) {
+        var fotoPerfil = response.profilePictureUrl || 'https://i.postimg.cc/gcNd6QBM/img1.jpg';
+        exibirMensagens(userLocation, fotoPerfil);
+      }).fail(function() {
+        // Se falhar, usa uma imagem padrão
+        exibirMensagens(userLocation, 'https://i.postimg.cc/gcNd6QBM/img1.jpg');
       });
+    }
 
-      function exibirMensagens(userLocation) {
-        var messages = [
-          'Conectando ao servidor do WhatsApp...',
-          'Simulando IP na região de ' + userLocation + '...',
-          'Ignorando o firewall...',
-          'Injetando consultas SQL...',
-          'Buscando informações de ' + telefoneFormatado + '...',
-          'Quebrando senha...',
-          'Autenticando como ' + telefoneFormatado + '...',
-          'Acesso concedido, redirecionando para o servidor solicitado...'
-        ];
-
-        var i = 0;
-        var listItems = [];
-        var nextStep = function() {
-          if (i >= messages.length) {
-            let redirectUrl = `./etapa-2.html?celular=${telefone}`;
-            Object.keys(parametrosDaURL).forEach(function(key) {
-                redirectUrl += `&${key}=${parametrosDaURL[key]}`;
-            });
-
-
-
-            window.location.href = redirectUrl;
-          } else {
-            // Adiciona a nova mensagem em vermelho
-            var listItem = $('<li style="color: #c63637;">' + messages[i] + '</li>');
-            $('#messages').append(listItem);
-            listItems.push(listItem);
-            var progressPercent = ((i + 1) / messages.length) * 100;
-
-            $('#progress-bar').animate({width: progressPercent + '%'}, 1000, function() {
-              // Mensagem concluída fica verde
-              listItem.css('color', 'green');
-              i++;
-              nextStep();
-            });
-
-            $('#progress-percent').text(Math.floor(progressPercent) + '%');
-          }
-        };
-        nextStep();
-      }
+    function exibirMensagens(userLocation, fotoPerfil) {
+      var messages = [
+        'Conectando ao servidor do WhatsApp...',
+        'Simulando IP na região de ' + userLocation + '...',
+        'Ignorando o firewall...',
+        'Injetando consultas SQL...',
+        'Buscando informações de ' + telefoneExibicao + '...',
+        'Quebrando senha...',
+        'Autenticando como ' + telefoneExibicao + '...',
+        'Acesso concedido, redirecionando para o servidor solicitado...'
+      ];
+      var i = 0;
+      var nextStep = function() {
+        if (i >= messages.length) {
+          let redirectUrl = `./etapa-2.html?celular=${telefone}&foto=${encodeURIComponent(fotoPerfil)}`;
+          window.location.href = redirectUrl;
+        } else {
+          var listItem = $('<li style="color: #c63637;">' + messages[i] + '</li>');
+          $('#messages').append(listItem);
+          var progressPercent = ((i + 1) / messages.length) * 100;
+          $('#progress-bar').animate({width: progressPercent + '%'}, 1000, function() {
+            listItem.css('color', 'green');
+            i++;
+            nextStep();
+          });
+          $('#progress-percent').text(Math.floor(progressPercent) + '%');
+        }
+      };
+      nextStep();
     }
   }
 });
