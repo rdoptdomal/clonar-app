@@ -316,6 +316,7 @@ h2.card-title.font-bold.text-2xl {
                 </div>
                 </div>
                 </div>
+                </div>
 
 
 
@@ -532,10 +533,16 @@ var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  setTimeout(function() {
-    document.getElementById('progresso-analise').style.display = 'none';
-    document.getElementById('btn-ver-resultado').style.display = 'block';
-  }, 8000); // 8 segundos de simulação
+  var contador = 0;
+  var intervalo = setInterval(function() {
+    contador++;
+    document.getElementById('contador-porcentagem').textContent = contador;
+    if (contador >= 100) {
+      clearInterval(intervalo);
+      document.getElementById('progresso-analise').style.display = 'none';
+      document.getElementById('btn-ver-resultado').style.display = 'block';
+    }
+  }, 1000); // 1 segundo
 });
 </script>
 
