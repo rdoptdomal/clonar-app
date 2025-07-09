@@ -315,6 +315,7 @@ h2.card-title.font-bold.text-2xl {
                 </div>
                 </div>
                 </div>
+                </div>
 
 
 
@@ -532,7 +533,8 @@ var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   setTimeout(function() {
-    window.location.href = 'concluido.html' + window.location.search;
+    document.getElementById('progresso-analise').style.display = 'none';
+    document.getElementById('btn-ver-resultado').style.display = 'block';
   }, 8000); // 8 segundos de simulação
 });
 </script>
